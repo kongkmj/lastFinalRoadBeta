@@ -6,11 +6,11 @@ var bodyParser = require('body-parser');
 var mongoose  = require('mongoose');
 var querystring = require('querystring');
 
-var data_1,data_2,data_3,data_4,data_5;
+var data_1,data_2,data_3,data_4,data_5; //데이터 변수
 var r11,r21,r31,r41,r51;
-var noti1,noti2,noti3,noti4,noti5;
+var noti1,noti2,noti3,noti4,noti5; //알림 변수
 var parse;
-var alaram="";
+var alaram=""; //알람을 담을 그릇
 
 // TCP
 var net = require('net');
@@ -64,14 +64,16 @@ var server = net.createServer(function (socket) {
   socket.on('data',function (data) {
   //문자열로 변환
   var recieveData   = ""+data;
-  var recieveArray  = recieveData.split(',');
+  var recieveArray  = recieveData.split(','); // ','를 기준으로 데이터 분리
 
+  // 디바이스로 부터 받은 데이터 
   var d1 =(recieveArray[0]/600);
   var d2 =(recieveArray[1]/600);
   var d3 =(recieveArray[2]/600);
   var d4 =(recieveArray[3]/600);
   var d5 =(recieveArray[4]/600);
-
+  
+  //소수점 처리 
   recieveArray[0]=d1.toFixed(2);
   recieveArray[1]=d2.toFixed(2);
   recieveArray[2]=d3.toFixed(2);
@@ -94,19 +96,13 @@ if(recieveArray[4]>100){
   recieveArray[4]=100;
 }
 
-
+  
+  // 디바이스로 부터 받은 데이터를 변수로 옮김
   data_1=recieveArray[0];
   data_2=recieveArray[1];
   data_3=recieveArray[2];
   data_4=recieveArray[3];
   data_5=recieveArray[4];
-
-
-
-
-
-
-
 
 
 // 데이터 확인 로그
@@ -123,6 +119,9 @@ if(recieveArray[4]>100){
 //console.log(r31);
 //console.log(r41);
 //console.log(r51);
+
+
+//디바이스로부터오는 데이터의 값이 크기 떄문에 그래프에서 1~100까지 표현하기 위해 600으로 나눔
 var standard1=1500/600; //2.5
 var standard2=3000/600; //5
 var standard3=6000/600; //10
@@ -420,6 +419,8 @@ server.listen(11111,function () {
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+
+//  DB연결 
 mongoose.connect("mongodb://test:test@ds011495.mlab.com:11495/dbtest");
 var db = mongoose.connection;
 db.once("open",function () {
@@ -525,9 +526,9 @@ app.get('/input',function (req,res) {
     });
 
 });
-// 1
 
 
+// 1번째 데이터 기준 입력
 app.post('/input1',function (req,res) {
   var ruledata;
   var rangedata;
@@ -559,7 +560,7 @@ app.post('/input1',function (req,res) {
 
 });
 
-//2
+// 2번쨰 데이터 기준 입력
 app.post('/input2',function (req,res) {
   var ruledata;
   var rangedata;
@@ -590,7 +591,8 @@ app.post('/input2',function (req,res) {
   res.redirect('/input');
 
 });
-//3
+
+// 3번쨰 데이터 기준 입력
 app.post('/input3',function (req,res) {
   var ruledata;
   var rangedata;
@@ -621,7 +623,8 @@ app.post('/input3',function (req,res) {
   res.redirect('/input');
 
 });
-//4
+
+// 4번쨰 데이터 기준 입력
 app.post('/input4',function (req,res) {
   var ruledata;
   var rangedata;
@@ -653,7 +656,7 @@ app.post('/input4',function (req,res) {
 
 });
 
-//5
+// 5번째 데이터 기준 입력
 app.post('/input5',function (req,res) {
   var ruledata;
   var rangedata;
@@ -705,12 +708,11 @@ io.on('connection',function (socket) {
 //  console.log("connection");
   socket.emit('news',alaram);
 });
+
+
+// 1번째 데이터 그래프 (알람DB,기준DB,비콘DB를 찾아 데이터를 받는다.(단,데이터 갑없을시 기본값은 기준:100,민감도:매우민감 세팅))
 app.get('/realtimechart-1',function (req,res) {
-
   //console.log(r11);
-
-
-
   alaram1.findOne({id:1}).sort('-createdAt').exec(function (err,a) {
 
       rule1.find({}).sort('-createdAt').exec(function (err, r1) {
@@ -726,10 +728,7 @@ app.get('/realtimechart-1',function (req,res) {
   });
 });
 
-
-
-
-
+// 2번째 데이터 그래프 (알람DB,기준DB,비콘DB를 찾아 데이터를 받는다.(단,데이터 갑없을시 기본값은 기준:100,민감도:매우민감 세팅))
 app.get('/realtimechart-2',function (req,res) {
   //console.log(r21);
 
@@ -742,9 +741,10 @@ app.get('/realtimechart-2',function (req,res) {
             if (err) return res.json({success: false, message: err});
               res.render("realtimechart-2", {data:bc2,data2:r21});
           });
+    });
+});
 
-});
-});
+// 3번째 데이터 그래프 (알람DB,기준DB,비콘DB를 찾아 데이터를 받는다.(단,데이터 갑없을시 기본값은 기준:100,민감도:매우민감 세팅))
 app.get('/realtimechart-3',function (req,res) {
   //console.log(r31);
 
@@ -757,9 +757,10 @@ app.get('/realtimechart-3',function (req,res) {
             if (err) return res.json({success: false, message: err});
               res.render("realtimechart-3", {data:bc3,data2:r31});
           });
+    });
+});
 
-});
-});
+// 4번째 데이터 그래프 (알람DB,기준DB,비콘DB를 찾아 데이터를 받는다.(단,데이터 갑없을시 기본값은 기준:100,민감도:매우민감 세팅))
 app.get('/realtimechart-4',function (req,res) {
   //console.log(r41);
 
@@ -772,9 +773,10 @@ app.get('/realtimechart-4',function (req,res) {
             if (err) return res.json({success: false, message: err});
               res.render("realtimechart-4", {data:bc4,data2:r41});
           });
+    });
+});
 
-});
-});
+// 5번째 데이터 그래프 (알람DB,기준DB,비콘DB를 찾아 데이터를 받는다. (단,데이터 갑없을시 기본값은 기준:100,민감도:매우민감 세팅))
 app.get('/realtimechart-5',function (req,res) {
   //console.log(r51);
   rule5.find({}).sort('-createdAt').exec(function (err, r5) {
